@@ -178,6 +178,7 @@ module ParamsVerification
 
     if param_value.nil? && rule.options[:default]
       if namespace
+        params[namespace] ||= {}
         params[namespace][param_name] = param_value = rule.options[:default]
       else
         params[param_name] = param_value = rule.options[:default]
@@ -187,6 +188,7 @@ module ParamsVerification
     # cast the type if a type is defined and if a range of options isn't defined since the casting should have been done already
     if rule.options[:type] && !param_value.nil?
       if namespace
+        params[namespace] ||= {}
         params[namespace][param_name] = param_value = type_cast_value(rule.options[:type], param_value)
       else
         params[param_name] = param_value = type_cast_value(rule.options[:type], param_value)
