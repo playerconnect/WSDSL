@@ -1,12 +1,12 @@
 # Web Service DSL
 
-WSDSL is a simple DSL allowind developers to simply describe and
-document their web APIS. For instance:
+WSDSL is a simple DSL allowing developers to describe and
+document their web APIs. For instance:
 
 
     describe_service "hello_world" do |service|
       service.formats    :xml
-      service.http_verb :get
+      service.http_verb  :get
       service.disable_auth # on by default
 
       service.param.string  :name, :default => 'World'
@@ -21,7 +21,7 @@ document their web APIS. For instance:
         doc.overall "This service provides a simple hello world implementation example."
         doc.params :name, "The name of the person to greet."
         doc.example "<code>http://example.com/hello_world.xml?name=Matt</code>"
-     end
+      end
 
     end
 
@@ -89,7 +89,7 @@ Or a more complex example:
 
 ## Test suite
 
-This library comes with a test suite requiring Ruby 1.9.2
+This library comes with a test suite requiring Ruby 1.9.2.
 The following gems need to be available:
 Rspec, Rack, Sinatra
 
