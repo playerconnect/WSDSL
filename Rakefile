@@ -4,13 +4,14 @@ require'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "wsdsl"
-  gem.homepage = "http://github.com/mattetti/wsdsl"
+  gem.name = "playerconnect-wsdsl"
+  gem.homepage = "http://github.com/playerconnect/wsdsl"
   gem.license = "MIT"
   gem.summary = %Q{Web Service DSL}
   gem.description = %Q{A Ruby DSL describing Web Services without implementation details.}
   gem.email = "mattaimonetti@gmail.com"
-  gem.authors = ["Matt Aimonetti"]
+  gem.authors = ["Matt Aimonetti", "Peter Heino", "James Bunch"]
+  gem.version = "0.2.1"
   # Include your dependencies below. Runtime dependencies are required when using your gem,
   # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
   #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
