@@ -5,13 +5,13 @@
 
 Gem::Specification.new do |s|
   s.name = %q{playerconnect-wsdsl}
-  s.version = "0.2.1"
+  s.version = "0.2.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Matt Aimonetti}, %q{Peter Heino}, %q{James Bunch}]
+  s.authors = [%q{Team SDOD}]
   s.date = %q{2011-07-07}
   s.description = %q{A Ruby DSL describing Web Services without implementation details.}
-  s.email = %q{mattaimonetti@gmail.com}
+  s.email = %q{sdod@scea.com}
   s.extra_rdoc_files = [
     "LICENSE",
     "README.md"
@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
     "lib/response.rb",
     "lib/ws_list.rb",
     "lib/wsdsl.rb",
+    "playerconnect-wsdsl.gemspec",
     "spec/hello_world_controller.rb",
     "spec/hello_world_service.rb",
     "spec/params_verification_spec.rb",
