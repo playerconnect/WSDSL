@@ -320,7 +320,7 @@ class WSDSL
   # Check if we need to use a restful route in which case we need
   # to update the service action
   def update_restful_action(verb)
-    if verb != :get && @action && @action == 'list'
+    if verb != :get && @action && %w{list show}.include?(@action)
       case verb
       when :post
         @action = 'create'
