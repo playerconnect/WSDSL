@@ -172,7 +172,7 @@ describe WSDSL do
         end
       end
       service.doc.namespaced_params.should_not be_empty
-      ns = service.doc.namespaced_params.find{|ns| ns.name == :preference}
+      ns = service.doc.namespaced_params.find{|nsp| nsp.name == :preference}
       ns.should_not be_nil
       ns.params[:id].should be == "Ze id."
     end
