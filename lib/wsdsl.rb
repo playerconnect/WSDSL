@@ -75,7 +75,18 @@ class WSDSL
   # @return [WSController]
   # @api public
   attr_reader :controller
-  
+
+  # Name of the controller action associated with the service
+  # @param [String, Symbol] 
+  #
+  # @api public
+  attr_writer :action
+
+  # Name of the controller associated with the service
+  # @param [String, Symbol]
+  # @api public
+  attr_writer :controller_name
+
   # Name of the service
   #
   # @return [String]
@@ -265,7 +276,7 @@ class WSDSL
   # Sets and/or returns the service action
   # @param [String, Symbol] a Action to use for the service, such as :show
   #
-  # @return Symbol  The service action
+  # @return [Symbol]  The service action
   # @api public
   def action(a=nil)
     @action = a.to_sym if a
@@ -275,7 +286,7 @@ class WSDSL
   # Sets and/or returns the controller name
   # @param [String, Symbol] cn Controller name to use for the service
   #
-  # @return String  The controller name
+  # @return [String]  The controller name
   # @api public
   def controller_name(cn=nil)
     @controller_name = cn.to_s if cn
