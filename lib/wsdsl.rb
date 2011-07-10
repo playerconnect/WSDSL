@@ -76,18 +76,6 @@ class WSDSL
   # @api public
   attr_reader :controller
   
-  # Name of the controller action associated with the service 
-  #
-  # @return [String]
-  # @api public
-  attr_accessor :action
-  
-  # Name of the controller associated with the service
-  #
-  # @return [String]
-  # @api public
-  attr_accessor :controller_name
-  
   # Name of the service
   #
   # @return [String]
@@ -238,7 +226,7 @@ class WSDSL
   def enable_ssl
     @ssl = true
   end
-  
+
   # Mark the current service as not accepting any params.
   # This is purely for expressing the developer's objective since 
   # by default an error is raise if no params are defined and some
@@ -273,7 +261,27 @@ class WSDSL
     f_types.each{|f| @formats << f unless @formats.include?(f) }
     @formats
   end
-  
+
+  # Sets and/or returns the service action
+  # @param [String, Symbol] a Action to use for the service, such as :show
+  #
+  # @return Symbol  The service action
+  # @api public
+  def action(a=nil)
+    @action = a.to_sym if a
+    @action
+  end
+
+  # Sets and/or returns the controller name
+  # @param [String, Symbol] cn Controller name to use for the service
+  #
+  # @return String  The controller name
+  # @api public
+  def controller_name(cn=nil)
+    @controller_name = cn.to_s if cn
+    @controller_name
+  end
+
   # Sets the accepted HTTP verbs or return it if nothing is passed.
   #
   # @return [String, Symbol]
