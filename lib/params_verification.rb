@@ -237,7 +237,9 @@ module ParamsVerification
       end
     # An array type is a comma delimited string, we need to cast the passed strings.
     when :array
-      value.respond_to?(:split) ? value.split(',') : value
+      # input "[1, 2, 3, 4, 5]" (String)  output [1, 2, 3, 4, 5] (Array)
+      # strip away [] characters and then split on commas with optional surrounding whitespace
+      value.respond_to?(:split) ? value.gsub(/(?:^\[|\]$)/, '').split(/\s*,\s*/) : value
     when :binary, :array, :file
       value
     else
