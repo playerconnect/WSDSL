@@ -237,16 +237,38 @@ module ParamsVerification
       end
     # An array type is a comma delimited string, we need to cast the passed strings.
     when :array
-      # input "[1, 2, 3, 4, 5]" (String)  output [1, 2, 3, 4, 5] (Array)
-      # strip away [] characters and then split on commas with optional surrounding whitespace
-      value.respond_to?(:split) ? value.gsub(/(?:^\[|\]$)/, '').split(/\s*,\s*/) : value
+      if value.respond_to?(:split)
+        # For compatibility with testing frameworks that pass in arrays using
+        # Ruby notation, strip away unwanted square brackets ([]), double quotes ("),
+        # and whitespace from the notation.
+        #
+        # only after the non-escaped (backslash preceded) double quote (") characters
+        # have been removed, remove any backslash characters from the string that
+        # appear immediately before a double quote (") character (thereby un-escaping
+        # the double quote character).
+        #
+        # Pattern  = Description
+        # (?:)     = non-capturing regex group (used for ORing)
+        # ^\[      = opening square bracket ([) at the start of the string
+        # \]$      = closing square bracket (]) at the end of the string
+        # (?<!\\") = a non-escaped double-quote (escaped ones need to be preserved)
+        #
+        # \\"      = a single backslash followed by a double quotes character
+        if value.size > 1 && value[0] == '[' && value[-1] == ']'
+          value.gsub!(/(?:^\[|\]$|(?<!\\)")/, '').gsub!('\\"','"')
+        end
+        # the resulting string can now be split using an optionally whitespace padded
+        # comma (,) delimiter.
+        value = value.split(/\s*,\s*/)
+      end
+      value
     when :binary, :array, :file
       value
     else
       value
     end
   end
-  
+
   # Checks that the value's type matches the expected type for a given param
   #
   # @param [Symbol, String] Param name used if the verification fails and that an error is raised.
