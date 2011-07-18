@@ -75,7 +75,10 @@ module ParamsVerification
     
     # verify nested params, only 1 level deep tho
     params.each_pair do |key, value|
-      if value.is_a?(Hash)
+      # We are now assuming a file param is a hash due to Rack::Mulitpart.parse_multipart 
+      # turns this data into a hash, but param verification/DSL dont expect this or define this behavior and it shouldn't.
+      # so special case it if its a file type and the value is a hash.
+      if value.is_a?(Hash) && type_for_param(service_params, key) != :file
         namespaced = service_params.namespaced_params.find{|np| np.space_name.to_s == key.to_s}
         raise UnexpectedParam, "Request included unexpected parameter: #{key}" if namespaced.nil?
         unexpected_params?(params[key], namespaced.param_names)
@@ -285,6 +288,14 @@ module ParamsVerification
     validation = ParamsVerification.type_validations[expected_type.to_sym]
     unless validation.nil? || value.to_s =~ validation
       raise InvalidParamType, "Value for parameter '#{name}' (#{value}) is of the wrong type (expected #{expected_type})"
+    end
+  end
+  
+  def self.type_for_param(service_params, name)
+    (service_params.list_required + service_params.list_optional).each do |rule|
+      if rule.name.to_s == name.to_s
+        return rule.options[:type]
+      end
     end
   end
   
