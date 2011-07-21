@@ -1,5 +1,5 @@
 gemset_name=wsdsl
-ruby_version=1.9.2-p180
+ruby_version=1.9.2-p290
 rubygems_version=1.8.5
 # specify multiple gems with spaces ex: ('foo 1.2.3' 'bar 5.6.7')
 gems=('jeweler 1.6.4' 'rspec 2.6.0' 'yard 0.7.2' 'rack-test 0.5.7' 'sinatra 1.2.0')
