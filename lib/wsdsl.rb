@@ -136,6 +136,7 @@ class WSDSL
     @ssl                 = false
     @auth_required       = true
     @extra               = {}
+    @content_type        = nil
   end
   
   # Checks the WSDSL flag to see if the controller names are pluralized.
@@ -236,6 +237,16 @@ class WSDSL
   # @api public
   def enable_ssl
     @ssl = true
+  end
+  
+  # Sets and/or returns the service content_type
+  # @param [String] Valid HTTP content_type like 'multipart/form-data'
+  #
+  # @return [String]  The content type for this service
+  # @api public
+  def content_type(ct=nil)
+   @content_type = ct if ct
+   @content_type
   end
 
   # Mark the current service as not accepting any params.
