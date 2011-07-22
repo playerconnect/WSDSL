@@ -240,31 +240,7 @@ module ParamsVerification
       end
     # An array type is a comma delimited string, we need to cast the passed strings.
     when :array
-      if value.respond_to?(:split)
-        # For compatibility with testing frameworks that pass in arrays using
-        # Ruby notation, strip away unwanted square brackets ([]), double quotes ("),
-        # and whitespace from the notation.
-        #
-        # only after the non-escaped (backslash preceded) double quote (") characters
-        # have been removed, remove any backslash characters from the string that
-        # appear immediately before a double quote (") character (thereby un-escaping
-        # the double quote character).
-        #
-        # Pattern  = Description
-        # (?:)     = non-capturing regex group (used for ORing)
-        # ^\[      = opening square bracket ([) at the start of the string
-        # \]$      = closing square bracket (]) at the end of the string
-        # (?<!\\") = a non-escaped double-quote (escaped ones need to be preserved)
-        #
-        # \\"      = a single backslash followed by a double quotes character
-        if value.size > 1 && value[0] == '[' && value[-1] == ']'
-          value.gsub!(/(?:^\[|\]$|(?<!\\)")/, '').gsub!('\\"','"')
-        end
-        # the resulting string can now be split using an optionally whitespace padded
-        # comma (,) delimiter.
-        value = value.split(/\s*,\s*/)
-      end
-      value
+      value.respond_to?(:split) && !value.respond_to?(:compact) ? value.split(',') : value
     when :binary, :array, :file
       value
     else
