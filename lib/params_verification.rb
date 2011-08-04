@@ -49,9 +49,11 @@ module ParamsVerification
     unless ignore_unexpected
       unexpected_params?(params, service_params.param_names)
     end
+
+    # Create a duplicate of the params hash that uses symbols as keys,
+    # while preserving the original hash
+    updated_params = symbolify_keys(params)
     
-    # dupe the params so we don't modify the passed value
-    updated_params = params.dup      
     # Required param verification
     service_params.list_required.each do |rule|
       updated_params = validate_required_rule(rule, updated_params)
@@ -84,13 +86,34 @@ module ParamsVerification
         unexpected_params?(params[key], namespaced.param_names)
       end
     end
-    
+
     updated_params
   end
-  
-  
+
+
   private
-  
+
+  # Create a copy of hash that enforces the usage of symbols as keys
+  #
+  #
+  # @params [Hash] The hash to copy
+  #
+  # @return [Hash] A copy of the given hash, but with all keys forced to be symbols
+  #
+  # @api private
+  def self.symbolify_keys(a_hash={})
+    new_hash = {}
+    a_hash.each do |k,v|
+      if v.class.to_s =~ /^Hash/
+        new_hash[k.to_sym] = symbolify_keys(v)
+      else
+        new_hash[k.to_sym] = v
+      end
+    end
+    new_hash
+  end
+
+
   # Validate a required rule against a list of params passed.
   #
   #
@@ -103,7 +126,8 @@ module ParamsVerification
   #
   # @api private
   def self.validate_required_rule(rule, params, namespace=nil)
-    param_name  = rule.name.to_s
+    param_name  = rule.name.to_sym
+    namespace = namespace.to_sym if namespace
     
     param_value, namespaced_params = extract_param_values(params, param_name, namespace)
     # puts "verify #{param_name} params, current value: #{param_value}"
@@ -175,7 +199,8 @@ module ParamsVerification
   # 
   # @api private
   def self.run_optional_rule(rule, params, namespace=nil)
-    param_name  = rule.name.to_s
+    param_name  = rule.name.to_sym
+    namespace = namespace.to_sym if namespace
 
     param_value, namespaced_params = extract_param_values(params, param_name, namespace)
 
