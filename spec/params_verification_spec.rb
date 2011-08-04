@@ -22,16 +22,16 @@ describe ParamsVerification do
   
   it "should set the default value for an optional param" do
     params = @valid_params.dup
-    params['timestamp'].should be_nil
+    params[:timestamp].should be_nil
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
-    returned_params['timestamp'].should_not be_nil
+    returned_params[:timestamp].should_not be_nil
   end
 
   it "should set the default value for a namespace optional param" do
     params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123'}}
-    params['user']['mailing_list'].should be_nil
+    params[:user].should be_nil
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
-    returned_params['user']['mailing_list'].should be_true
+    returned_params[:user][:mailing_list].should be_true
   end
   
   it "should raise an exception when a required param is missing" do
@@ -45,7 +45,7 @@ describe ParamsVerification do
     service.should_not be_nil
     params = {'seq' => "a,b,c,d,e,g"}
     validated = ParamsVerification.validate!(params, service.defined_params)
-    validated['seq'].should == %W{a b c d e g}
+    validated[:seq].should == %W{a b c d e g}
   end
 
   it "should not raise an exception if a req array param doesn't contain a comma" do
