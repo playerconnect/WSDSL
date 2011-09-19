@@ -140,20 +140,28 @@ module ParamsVerification
     # Checks presence
     if !(namespaced_params || params).keys.include?(param_name)
       raise MissingParam, "'#{rule.name}' is missing - passed params: #{params.inspect}."
+    end
+    
     # checks null
-    elsif param_value.nil? && !rule.options[:null]
+    if param_value.nil? && !rule.options[:null]
       raise  InvalidParamValue, "Value for parameter '#{param_name}' is missing - passed params: #{params.inspect}."
+    end
+    
     # checks type
-    elsif rule.options[:type]
+    if rule.options[:type]
       verify_cast(param_name, param_value, rule.options[:type])
-    elsif rule.options[:options] || rule.options[:in]
+    end
+    
+    if rule.options[:options] || rule.options[:in]
       choices = rule.options[:options] || rule.options[:in]
       if rule.options[:type]
         # Force the cast so we can compare properly
         param_value = params[param_name] = type_cast_value(rule.options[:type], param_value)
       end
       raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values." unless choices.include?(param_value)
-    elsif rule.options[:minvalue]
+    end
+    
+    if rule.options[:minvalue]
       min = rule.options[:minvalue]
       raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i >= min
     end
