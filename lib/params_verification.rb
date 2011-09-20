@@ -163,7 +163,7 @@ module ParamsVerification
     
     if rule.options[:minvalue]
       min = rule.options[:minvalue]
-      raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i >= min
+      raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i < min
     end
     # Returns the updated params
     
