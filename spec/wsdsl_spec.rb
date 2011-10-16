@@ -105,8 +105,8 @@ describe WSDSL do
         @service = service.name
       end
 
-      def send(action)
-        [@app, @service, action]
+      def list
+        [@app, @service]
       end
     end
 
@@ -135,7 +135,7 @@ describe WSDSL do
       describe_service("projects.xml") { |s| }
       service = WSList.all.find{|s| s.url == "projects.xml"}
       service.controller_dispatch("application").
-        should == ["application", "projects", "list"]
+        should == ["application", "projects"]
     end
 
     it "should be able to dispatch namespaced controller" do
@@ -150,10 +150,10 @@ describe WSDSL do
       end
 
       service = WSList.all.find{|s| s.url == "project/:project_id/tasks.xml"}
-      service.controller_dispatch("application").should == ["application", "project", "list"]
+      service.controller_dispatch("application").should == ["application", "project"]
 
       service = WSList.all.find{|s| s.url == "project/:project_id/task/:task_id/items.xml"}
-      service.controller_dispatch("application").should == ["application", "project", "list"]
+      service.controller_dispatch("application").should == ["application", "project"]
     end
 
     it "should raise exception when controller class is not found" do
