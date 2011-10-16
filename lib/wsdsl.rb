@@ -175,6 +175,7 @@ class WSDSL
           @controller = @controller.const_get(const)
         end
       rescue NameError => e
+        @controller = nil
         raise "The #{@controller_name} class was not found"
       end
     end

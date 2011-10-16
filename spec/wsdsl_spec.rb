@@ -164,6 +164,8 @@ describe WSDSL do
       service = WSList.all.find{|s| s.url == "unknown.xml"}
       lambda { service.controller_dispatch("application") }.
         should raise_error("The UnknownController class was not found")
+      lambda { service.controller_dispatch("application") }.
+        should raise_error("The UnknownController class was not found")
     end
   end
 
