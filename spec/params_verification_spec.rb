@@ -63,7 +63,7 @@ describe ParamsVerification do
   it "should raise an exception when a param is under the minvalue" do
     params = @valid_params.dup
     params['num'] = 1
-    lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamType)
+    lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
   end
   
   it "should raise an exception when a param isn't in the param option list" do
