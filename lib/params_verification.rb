@@ -151,27 +151,17 @@ module ParamsVerification
     if rule.options[:type]
       verify_cast(param_name, param_value, rule.options[:type])
     end
-    
-    if rule.options[:options] || rule.options[:in]
-      choices = rule.options[:options] || rule.options[:in]
-      if rule.options[:type]
-        # Force the cast so we can compare properly
-        param_value = params[param_name] = type_cast_value(rule.options[:type], param_value)
-      end
-      raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values." unless choices.include?(param_value)
-    end
-    
-    if rule.options[:minvalue]
-      min = rule.options[:minvalue]
-      raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i < min
-    end
-    # Returns the updated params
-    
+
+    # enforce a variety of restrictions applicable to both optional and required fields
+    enforce_non_nil_restrictions(rule, param_name, param_value, namespaced_params)
+
     # cast the type if a type is defined and if a range of options isn't defined since the casting should have been done already
     if rule.options[:type] && !(rule.options[:options] || rule.options[:in])
       # puts "casting #{param_value} into type: #{rule.options[:type]}"
       params[param_name] = type_cast_value(rule.options[:type], param_value)
     end
+
+    # Returns the updated params
     params
   end
 
@@ -235,7 +225,11 @@ module ParamsVerification
     if choices && param_value && !choices.include?(param_value)
       raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values."
     end
-    
+
+    # if an optional value is non nil, run it through the non nil restrictions (for example, a string
+    # param may be allowed to be left blank, but when populated it may have a max length restriction)
+    enforce_non_nil_restrictions(rule, param_name, param_value, namespaced_params) if param_value
+
     params
   end
   
@@ -246,8 +240,27 @@ module ParamsVerification
       raise UnexpectedParam, "Request included unexpected parameter(s): #{unexpected_keys.join(', ')}"
     end
   end
-  
-  
+
+  # Common to both the required and optional param values are a set of rules that become
+  # enforced if a non nil value is passed up. For example, a minimum value rule will not
+  # be applied to an optional rule if a value is not present (so that the default value is
+  # used), but it becomes enforced if a value was passed up.
+  def self.enforce_non_nil_restrictions(rule, param_name, param_value, namespaced_params)
+    if rule.options[:options] || rule.options[:in]
+      choices = rule.options[:options] || rule.options[:in]
+      if rule.options[:type]
+        # Force the cast so we can compare properly
+        param_value = params[param_name] = type_cast_value(rule.options[:type], param_value)
+      end
+      raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values." unless choices.include?(param_value)
+    end
+
+    if rule.options[:minvalue]
+      min = rule.options[:minvalue]
+      raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i < min
+    end
+  end
+
   def self.type_cast_value(type, value)
     case type
     when :integer
