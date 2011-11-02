@@ -154,6 +154,7 @@ module ParamsVerification
 
     if rule.options[:options] || rule.options[:in]
       choices = rule.options[:options] || rule.options[:in]
+
       if rule.options[:type]
         # Force the cast so we can compare properly
         param_value = type_cast_value(rule.options[:type], param_value)
@@ -163,19 +164,9 @@ module ParamsVerification
           params[param_name] = param_value
         end
       end
-      if choices
-        valid =
-          begin
-            if param_value.is_a?(Array)
-              param_value & choices == param_value
-            else
-              choices.include?(param_value)
-            end
-          end
-        unless valid
-          raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values."
-        end
-      end
+
+      validate_inclusion_of(param_name, param_value, choices)
+
     end
 
     if rule.options[:minvalue]
@@ -254,19 +245,8 @@ module ParamsVerification
     end
 
     choices = rule.options[:options] || rule.options[:in]
-    if choices && param_value
-      valid =
-        begin
-          if param_value.is_a?(Array)
-            param_value & choices == param_value
-          else
-            choices.include?(param_value)
-          end
-        end
-      unless valid
-        raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values."
-      end
-    end
+
+    validate_inclusion_of(param_name, param_value, choices)
 
     if rule.options[:minvalue] && param_value
       min = rule.options[:minvalue]
@@ -342,6 +322,14 @@ module ParamsVerification
       if rule.name.to_s == name.to_s
         return rule.options[:type]
       end
+    end
+  end
+
+  def self.validate_inclusion_of(name, value, choices)
+    return unless choices && value
+    valid = value.is_a?(Array) ? (value & choices == value) : choices.include?(value)
+    unless valid
+      raise InvalidParamValue, "Value for parameter '#{name}' (#{value}) is not in the allowed set of values."
     end
   end
 
