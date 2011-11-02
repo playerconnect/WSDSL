@@ -5,6 +5,9 @@ describe ParamsVerification do
   before :all do
     @service = WSList.all.find{|s| s.url == 'services/test.xml'}
     @service.should_not be_nil
+  end
+
+  before do
     @valid_params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123'}}
   end
 
@@ -82,7 +85,7 @@ describe ParamsVerification do
   it "should raise an exception when a nested optional param isn't in the param option list" do
     params = @valid_params.dup
     params['user']['sex'] = 'large'
-    lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamType)
+    lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
     # other service
     params = {'preference' => {'region_code' => 'us', 'language_code' => 'de'}}
     service = WSList.all.find{|s| s.url == 'preferences.xml'}
