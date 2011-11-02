@@ -5,14 +5,14 @@
 #
 # @api public
 module ParamsVerification
-  
+
   class ParamError        < StandardError; end #:nodoc
   class NoParamsDefined   < ParamError; end #:nodoc
   class MissingParam      < ParamError; end #:nodoc
   class UnexpectedParam   < ParamError; end #:nodoc
   class InvalidParamType  < ParamError; end #:nodoc
   class InvalidParamValue < ParamError; end #:nodoc
-  
+
   # An array of validation regular expressions.
   # The array gets cached but can be accessed via the symbol key.
   #
@@ -27,12 +27,12 @@ module ParamsVerification
                             #:array    => /,/
                           }
   end
-  
+
   # Validation against each required WSDSL::Params::Rule
   # and returns the potentially modified params (with default values)
-  # 
+  #
   # @param [Hash] params The params to verify (incoming request params)
-  # @param [WSDSL::Params] service_params A Playco service param compatible object listing required and optional params 
+  # @param [WSDSL::Params] service_params A Playco service param compatible object listing required and optional params
   # @param [Boolean] ignore_unexpected Flag letting the validation know if unexpected params should be ignored
   #
   # @return [Hash]
@@ -40,10 +40,10 @@ module ParamsVerification
   #
   # @example Validate request params against a service's defined param rules
   #   ParamsVerification.validate!(request.params, @service.defined_params)
-  # 
+  #
   # @api public
   def self.validate!(params, service_params, ignore_unexpected=false)
-    
+
     # Verify that no garbage params are passed, if they are, an exception is raised.
     # only the first level is checked at this point
     unless ignore_unexpected
@@ -53,17 +53,17 @@ module ParamsVerification
     # Create a duplicate of the params hash that uses symbols as keys,
     # while preserving the original hash
     updated_params = symbolify_keys(params)
-    
+
     # Required param verification
     service_params.list_required.each do |rule|
       updated_params = validate_required_rule(rule, updated_params)
     end
-    
+
     # Set optional defaults if any optional
     service_params.list_optional.each do |rule|
       updated_params = run_optional_rule(rule, updated_params)
     end
-    
+
     # check the namespaced params
     service_params.namespaced_params.each do |param|
       param.list_required.each do |rule|
@@ -74,10 +74,10 @@ module ParamsVerification
       end
 
     end
-    
+
     # verify nested params, only 1 level deep tho
     params.each_pair do |key, value|
-      # We are now assuming a file param is a hash due to Rack::Mulitpart.parse_multipart 
+      # We are now assuming a file param is a hash due to Rack::Mulitpart.parse_multipart
       # turns this data into a hash, but param verification/DSL dont expect this or define this behavior and it shouldn't.
       # so special case it if its a file type and the value is a hash.
       if value.is_a?(Hash) && type_for_param(service_params, key) != :file
@@ -128,10 +128,10 @@ module ParamsVerification
   def self.validate_required_rule(rule, params, namespace=nil)
     param_name  = rule.name.to_sym
     namespace = namespace.to_sym if namespace
-    
+
     param_value, namespaced_params = extract_param_values(params, param_name, namespace)
     # puts "verify #{param_name} params, current value: #{param_value}"
-    
+
     #This is disabled since required params shouldn't have a default, otherwise, why are they required?
     #if param_value.nil? && rule.options && rule.options[:default]
       #param_value = rule.options[:default]
@@ -141,36 +141,49 @@ module ParamsVerification
     if !(namespaced_params || params).keys.include?(param_name)
       raise MissingParam, "'#{rule.name}' is missing - passed params: #{params.inspect}."
     end
-    
+
     # checks null
     if param_value.nil? && !rule.options[:null]
       raise  InvalidParamValue, "Value for parameter '#{param_name}' is missing - passed params: #{params.inspect}."
     end
-    
+
     # checks type
     if rule.options[:type]
       verify_cast(param_name, param_value, rule.options[:type])
     end
-    
+
     if rule.options[:options] || rule.options[:in]
       choices = rule.options[:options] || rule.options[:in]
+
       if rule.options[:type]
         # Force the cast so we can compare properly
-        param_value = params[param_name] = type_cast_value(rule.options[:type], param_value)
+        param_value = type_cast_value(rule.options[:type], param_value)
+        if namespace
+          params[namespace][param_name] = param_value
+        else
+          params[param_name] = param_value
+        end
       end
-      raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values." unless choices.include?(param_value)
+
+      validate_inclusion_of(param_name, param_value, choices)
+
     end
-    
+
     if rule.options[:minvalue]
       min = rule.options[:minvalue]
       raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i < min
     end
     # Returns the updated params
-    
+
     # cast the type if a type is defined and if a range of options isn't defined since the casting should have been done already
     if rule.options[:type] && !(rule.options[:options] || rule.options[:in])
       # puts "casting #{param_value} into type: #{rule.options[:type]}"
-      params[param_name] = type_cast_value(rule.options[:type], param_value)
+      param_value = type_cast_value(rule.options[:type], param_value)
+      if namespace
+        params[namespace][param_name] = param_value
+      else
+        params[param_name] = param_value
+      end
     end
     params
   end
@@ -199,12 +212,12 @@ module ParamsVerification
       end
     end
   end
-  
+
   # @param [#WSDSL::Params::Rule] rule The optional rule
   # @param [Hash] params The request params
   # @param [String] namespace An optional namespace
   # @return [Hash] The potentially modified params
-  # 
+  #
   # @api private
   def self.run_optional_rule(rule, params, namespace=nil)
     param_name  = rule.name.to_sym
@@ -220,7 +233,7 @@ module ParamsVerification
         params[param_name] = param_value = rule.options[:default]
       end
     end
-    
+
     # cast the type if a type is defined and if a range of options isn't defined since the casting should have been done already
     if rule.options[:type] && !param_value.nil?
       if namespace
@@ -232,9 +245,8 @@ module ParamsVerification
     end
 
     choices = rule.options[:options] || rule.options[:in]
-    if choices && param_value && !choices.include?(param_value)
-      raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values."
-    end
+
+    validate_inclusion_of(param_name, param_value, choices)
 
     if rule.options[:minvalue] && param_value
       min = rule.options[:minvalue]
@@ -243,7 +255,7 @@ module ParamsVerification
 
     params
   end
-  
+
   def self.unexpected_params?(params, param_names)
     # Raise an exception unless no unexpected params were found
     unexpected_keys = (params.keys - param_names)
@@ -251,8 +263,8 @@ module ParamsVerification
       raise UnexpectedParam, "Request included unexpected parameter(s): #{unexpected_keys.join(', ')}"
     end
   end
-  
-  
+
+
   def self.type_cast_value(type, value)
     case type
     when :integer
@@ -304,7 +316,7 @@ module ParamsVerification
       raise InvalidParamType, "Value for parameter '#{name}' (#{value}) is of the wrong type (expected #{expected_type})"
     end
   end
-  
+
   def self.type_for_param(service_params, name)
     (service_params.list_required + service_params.list_optional).each do |rule|
       if rule.name.to_s == name.to_s
@@ -312,5 +324,13 @@ module ParamsVerification
       end
     end
   end
-  
+
+  def self.validate_inclusion_of(name, value, choices)
+    return unless choices && value
+    valid = value.is_a?(Array) ? (value & choices == value) : choices.include?(value)
+    unless valid
+      raise InvalidParamValue, "Value for parameter '#{name}' (#{value}) is not in the allowed set of values."
+    end
+  end
+
 end
