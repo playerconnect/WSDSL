@@ -23,6 +23,7 @@ describe_service "services/test.xml" do |service|
     user.string :sex, :in => %Q{female, male}
     user.boolean :mailing_list, :default => true
     user.array :groups, :required => true, :in => %w{developer admin manager}
+    user.array :skills, :in => %w{ruby java networking}
   end
 
   # the response contains a list of player creation ratings each object in the list

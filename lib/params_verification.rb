@@ -254,8 +254,18 @@ module ParamsVerification
     end
 
     choices = rule.options[:options] || rule.options[:in]
-    if choices && param_value && !choices.include?(param_value)
-      raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values."
+    if choices && param_value
+      valid =
+        begin
+          if param_value.is_a?(Array)
+            param_value & choices == param_value
+          else
+            choices.include?(param_value)
+          end
+        end
+      unless valid
+        raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values."
+      end
     end
 
     if rule.options[:minvalue] && param_value

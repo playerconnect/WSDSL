@@ -8,7 +8,7 @@ describe ParamsVerification do
   end
 
   before do
-    @valid_params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123', 'groups' => 'manager,developer'}}
+    @valid_params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123', 'groups' => 'manager,developer', 'skills' => 'java,ruby'}}
   end
 
   it "should validate valid params" do
@@ -27,17 +27,26 @@ describe ParamsVerification do
     params = @valid_params
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
     returned_params[:user][:groups].should == @valid_params['user']['groups'].split(",")
+    returned_params[:user][:skills].should == @valid_params['user']['skills'].split(",")
   end
 
   it "should not duplicate params in the root level" do
     params = @valid_params
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
     returned_params[:groups].should be_nil
+    returned_params[:skills].should be_nil
   end
 
-  it "should raise exception when values are not in the allowed list" do
+  it "should raise exception when values of required param are not in the allowed list" do
     params = @valid_params
     params['user']['groups'] = 'admin,root,manager'
+    lambda { ParamsVerification.validate!(params, @service.defined_params) }.
+      should raise_error(ParamsVerification::InvalidParamValue)
+  end
+
+  it "should raise exception when values of opitonal param are not in the allowed list" do
+    params = @valid_params
+    params['user']['skills'] = 'ruby,java,php'
     lambda { ParamsVerification.validate!(params, @service.defined_params) }.
       should raise_error(ParamsVerification::InvalidParamValue)
   end
