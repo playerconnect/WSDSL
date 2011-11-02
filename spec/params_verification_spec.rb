@@ -8,7 +8,7 @@ describe ParamsVerification do
   end
 
   before do
-    @valid_params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123'}}
+    @valid_params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123', 'groups' => 'manager,developer'}}
   end
 
   it "should validate valid params" do
@@ -23,22 +23,27 @@ describe ParamsVerification do
     returned_params.keys.size.should >= 3
   end
 
-  it "should return the params" do
-    params = @valid_params.dup
+  it "should return array in the params" do
+    params = @valid_params
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
-    returned_params.should be_an_instance_of(Hash)
-    returned_params.keys.size.should >= 3
+    returned_params[:user][:groups].should == @valid_params['user']['groups'].split(",")
+  end
+
+  it "should not duplicate params in the root level" do
+    params = @valid_params
+    returned_params = ParamsVerification.validate!(params, @service.defined_params)
+    returned_params[:groups].should be_nil
   end
 
   it "should set the default value for an optional param" do
-    params = @valid_params.dup
+    params = @valid_params
     params[:timestamp].should be_nil
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
     returned_params[:timestamp].should_not be_nil
   end
 
   it "should set the default value for a namespace optional param" do
-    params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123'}}
+    params = {'framework' => 'RSpec', 'version' => '1.02', 'user' => {'id' => '123', 'groups' => 'admin'}}
     params[:user].should be_nil
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
     returned_params[:user][:mailing_list].should be_true

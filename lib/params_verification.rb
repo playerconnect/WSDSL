@@ -170,7 +170,12 @@ module ParamsVerification
     # cast the type if a type is defined and if a range of options isn't defined since the casting should have been done already
     if rule.options[:type] && !(rule.options[:options] || rule.options[:in])
       # puts "casting #{param_value} into type: #{rule.options[:type]}"
-      params[param_name] = type_cast_value(rule.options[:type], param_value)
+      param_value = type_cast_value(rule.options[:type], param_value)
+      if namespace
+        params[namespace][param_name] = param_value
+      else
+        params[param_name] = param_value
+      end
     end
     params
   end
