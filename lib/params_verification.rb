@@ -156,9 +156,26 @@ module ParamsVerification
       choices = rule.options[:options] || rule.options[:in]
       if rule.options[:type]
         # Force the cast so we can compare properly
-        param_value = params[param_name] = type_cast_value(rule.options[:type], param_value)
+        param_value = type_cast_value(rule.options[:type], param_value)
+        if namespace
+          params[namespace][param_name] = param_value
+        else
+          params[param_name] = param_value
+        end
       end
-      raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values." unless choices.include?(param_value)
+      if choices
+        valid =
+          begin
+            if param_value.is_a?(Array)
+              param_value & choices == param_value
+            else
+              choices.include?(param_value)
+            end
+          end
+        unless valid
+          raise InvalidParamValue, "Value for parameter '#{param_name}' (#{param_value}) is not in the allowed set of values."
+        end
+      end
     end
 
     if rule.options[:minvalue]

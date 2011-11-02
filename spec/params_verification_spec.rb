@@ -35,6 +35,13 @@ describe ParamsVerification do
     returned_params[:groups].should be_nil
   end
 
+  it "should raise exception when values are not in the allowed list" do
+    params = @valid_params
+    params['user']['groups'] = 'admin,root,manager'
+    lambda { ParamsVerification.validate!(params, @service.defined_params) }.
+      should raise_error(ParamsVerification::InvalidParamValue)
+  end
+
   it "should set the default value for an optional param" do
     params = @valid_params
     params[:timestamp].should be_nil

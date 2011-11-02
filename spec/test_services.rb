@@ -22,7 +22,7 @@ describe_service "services/test.xml" do |service|
     user.integer :id, :required => :true
     user.string :sex, :in => %Q{female, male}
     user.boolean :mailing_list, :default => true
-    user.array :groups, :required => true
+    user.array :groups, :required => true, :in => %w{developer admin manager}
   end
 
   # the response contains a list of player creation ratings each object in the list
