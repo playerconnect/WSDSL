@@ -135,7 +135,7 @@ describe WSDSL do
       describe_service("projects.xml") { |s| }
       service = WSList.all.find{|s| s.url == "projects.xml"}
       service.controller_dispatch("application").
-        should == ["application", "projects"]
+        should be == ["application", "projects"]
     end
 
     it "should be able to dispatch namespaced controller" do
@@ -150,10 +150,10 @@ describe WSDSL do
       end
 
       service = WSList.all.find{|s| s.url == "project/:project_id/tasks.xml"}
-      service.controller_dispatch("application").should == ["application", "project"]
+      service.controller_dispatch("application").should be == ["application", "project"]
 
       service = WSList.all.find{|s| s.url == "project/:project_id/task/:task_id/items.xml"}
-      service.controller_dispatch("application").should == ["application", "project"]
+      service.controller_dispatch("application").should be == ["application", "project"]
     end
 
     it "should raise exception when controller class is not found" do
@@ -188,7 +188,7 @@ describe WSDSL do
 
     it "should have a list of optional param rules" do
       @sparams.list_optional.should be_an_instance_of(Array)
-      @sparams.list_optional.length.should be == 4
+      @sparams.list_optional.length.should be == 5
     end
     
     it "should have a list of namespaced param rules" do

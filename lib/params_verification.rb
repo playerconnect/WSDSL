@@ -128,14 +128,7 @@ module ParamsVerification
   def self.validate_required_rule(rule, params, namespace=nil)
     param_name  = rule.name.to_sym
     namespace = namespace.to_sym if namespace
-
     param_value, namespaced_params = extract_param_values(params, param_name, namespace)
-    # puts "verify #{param_name} params, current value: #{param_value}"
-
-    #This is disabled since required params shouldn't have a default, otherwise, why are they required?
-    #if param_value.nil? && rule.options && rule.options[:default]
-      #param_value = rule.options[:default]
-    #end
 
     # Checks presence
     if !(namespaced_params || params).keys.include?(param_name)
@@ -147,44 +140,10 @@ module ParamsVerification
       raise  InvalidParamValue, "Value for parameter '#{param_name}' is missing - passed params: #{params.inspect}."
     end
 
-    # checks type
-    if rule.options[:type]
-      verify_cast(param_name, param_value, rule.options[:type])
-    end
+    # run the common set of rules used for any non nil value
+    params = self.run_when_not_nil(rule, params, namespace)
 
-    if rule.options[:options] || rule.options[:in]
-      choices = rule.options[:options] || rule.options[:in]
-
-      if rule.options[:type]
-        # Force the cast so we can compare properly
-        param_value = type_cast_value(rule.options[:type], param_value)
-        if namespace
-          params[namespace][param_name] = param_value
-        else
-          params[param_name] = param_value
-        end
-      end
-
-      validate_inclusion_of(param_name, param_value, choices)
-
-    end
-
-    if rule.options[:minvalue]
-      min = rule.options[:minvalue]
-      raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i < min
-    end
     # Returns the updated params
-
-    # cast the type if a type is defined and if a range of options isn't defined since the casting should have been done already
-    if rule.options[:type] && !(rule.options[:options] || rule.options[:in])
-      # puts "casting #{param_value} into type: #{rule.options[:type]}"
-      param_value = type_cast_value(rule.options[:type], param_value)
-      if namespace
-        params[namespace][param_name] = param_value
-      else
-        params[param_name] = param_value
-      end
-    end
     params
   end
 
@@ -213,6 +172,72 @@ module ParamsVerification
     end
   end
 
+
+  # Validate non nil values. They may have been optional if left blank, but
+  # when they are nil they are validated.
+  #
+  #
+  # @param [WSDSL::Params::Rule] rule The required rule to check against.
+  # @param [Hash] params The request params.
+  # @param [String] namespace Optional param namespace to check the rule against.
+  #
+  # @return [Hash]
+  #   A hash representing the potentially modified params after going through the filter.
+  #
+  # @api private
+  def self.run_when_not_nil(rule, params, namespace=nil)
+    param_name  = rule.name.to_sym
+    namespace = namespace.to_sym if namespace
+    param_value, namespaced_params = extract_param_values(params, param_name, namespace)
+
+    # checks type
+    if rule.options[:type]
+      verify_cast(param_name, param_value, rule.options[:type])
+      param_value = type_cast_value(rule.options[:type], param_value)
+      # update the params hash with the type cast value
+      if namespace
+        params[namespace] ||= {}
+        params[namespace][param_name] = param_value
+      else
+        params[param_name] = param_value
+      end
+    end
+
+    # checks the value against a whitelist style 'in'/'options' list
+    if rule.options[:options] || rule.options[:in]
+      choices = rule.options[:options] || rule.options[:in]
+      validate_inclusion_of(param_name, param_value, choices)
+    end
+
+    # enforce a minimum numeric value
+    if rule.options[:minvalue]
+      min = rule.options[:minvalue]
+      raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i < min
+    end
+
+    # enforce a maximum numeric value
+    if rule.options[:maxvalue]
+      max = rule.options[:maxvalue]
+      raise InvalidParamValue, "Value for parameter '#{param_name}' is higher than the max accepted value (#{max})." if param_value.to_i > max
+    end
+
+    # enforce a minimum string length
+    if rule.options[:minlength]
+      min = rule.options[:minlength]
+      raise InvalidParamValue, "Length of parameter '#{param_name}' is shorter than the min accepted value (#{min})." if param_value.to_s.length < min
+    end
+    
+    # enforce a maximum string length
+    if rule.options[:maxlength]
+      max = rule.options[:maxlength]
+      raise InvalidParamValue, "Length of parameter '#{param_name}' is longer than the max accepted value (#{max})." if param_value.to_s.length > max
+    end
+
+    # Return the modified params
+    params
+  end
+
+
   # @param [#WSDSL::Params::Rule] rule The optional rule
   # @param [Hash] params The request params
   # @param [String] namespace An optional namespace
@@ -222,39 +247,25 @@ module ParamsVerification
   def self.run_optional_rule(rule, params, namespace=nil)
     param_name  = rule.name.to_sym
     namespace = namespace.to_sym if namespace
-
     param_value, namespaced_params = extract_param_values(params, param_name, namespace)
 
+    # Use a default value if one is available and the submitted param value is nil
     if param_value.nil? && rule.options[:default]
+      param_value = rule.options[:default]
       if namespace
         params[namespace] ||= {}
-        params[namespace][param_name] = param_value = rule.options[:default]
+        params[namespace][param_name] = param_value
       else
-        params[param_name] = param_value = rule.options[:default]
+        params[param_name] = param_value
       end
     end
 
-    # cast the type if a type is defined and if a range of options isn't defined since the casting should have been done already
-    if rule.options[:type] && !param_value.nil?
-      if namespace
-        params[namespace] ||= {}
-        params[namespace][param_name] = param_value = type_cast_value(rule.options[:type], param_value)
-      else
-        params[param_name] = param_value = type_cast_value(rule.options[:type], param_value)
-      end
-    end
-
-    choices = rule.options[:options] || rule.options[:in]
-
-    validate_inclusion_of(param_name, param_value, choices)
-
-    if rule.options[:minvalue] && param_value
-      min = rule.options[:minvalue]
-      raise InvalidParamValue, "Value for parameter '#{param_name}' is lower than the min accepted value (#{min})." if param_value.to_i < min
-    end
+    # run the common set of rules used for any non nil value
+    params = self.run_when_not_nil(rule, params, namespace) if param_value
 
     params
   end
+
 
   def self.unexpected_params?(params, param_names)
     # Raise an exception unless no unexpected params were found

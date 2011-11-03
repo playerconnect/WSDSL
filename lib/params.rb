@@ -24,6 +24,8 @@ class WSDSL
       # @option options [Symbol] :default The default value of the param.
       # @option options [Symbol] :minvalue The minimum acceptable value.
       # @option options [Symbol] :maxvalue The maximim acceptable value.
+      # @option options [Symbol] :minlength The minimum acceptable string length.
+      # @option options [Symbol] :maxlength The maximum acceptable string length.
       # @api public
       attr_reader :options
 
@@ -36,6 +38,8 @@ class WSDSL
       # @option opts [Symbol] :default The default value of the param.
       # @option opts [Symbol] :minvalue The minimum acceptable value.
       # @option opts [Symbol] :maxvalue The maximim acceptable value.
+      # @option opts [Symbol] :minlength The minimum acceptable string length.
+      # @option opts [Symbol] :maxlength The maximum acceptable string length.
       # @api public
       def initialize(name, opts = {})
         @name    = name

@@ -26,8 +26,8 @@ describe ParamsVerification do
   it "should return array in the params" do
     params = @valid_params
     returned_params = ParamsVerification.validate!(params, @service.defined_params)
-    returned_params[:user][:groups].should == @valid_params['user']['groups'].split(",")
-    returned_params[:user][:skills].should == @valid_params['user']['skills'].split(",")
+    returned_params[:user][:groups].should be == @valid_params['user']['groups'].split(",")
+    returned_params[:user][:skills].should be == @valid_params['user']['skills'].split(",")
   end
 
   it "should not duplicate params in the root level" do
@@ -76,7 +76,7 @@ describe ParamsVerification do
     service.should_not be_nil
     params = {'seq' => "a,b,c,d,e,g"}
     validated = ParamsVerification.validate!(params, service.defined_params)
-    validated[:seq].should == %W{a b c d e g}
+    validated[:seq].should be == %W{a b c d e g}
   end
 
   it "should not raise an exception if a req array param doesn't contain a comma" do
@@ -94,6 +94,24 @@ describe ParamsVerification do
   it "should raise an exception when a param is under the minvalue" do
     params = @valid_params.dup
     params['num'] = 1
+    lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
+  end
+
+  it "should raise an exception when a param is over the maxvalue" do
+    params = @valid_params.dup
+    params['num'] = 10_000
+    lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
+  end
+
+  it "should raise an exception when a param is under the minlength" do
+    params = @valid_params.dup
+    params['name'] ='bob'
+    lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
+  end
+
+  it "should raise an exception when a param is over the maxlength" do
+    params = @valid_params.dup
+    params['name'] ='AreTheseGardensMyMother?AmIPartOfYouBoth?'
     lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
   end
 
