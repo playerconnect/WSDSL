@@ -4,20 +4,22 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{playerconnect-wsdsl}
-  s.version = "0.3.4"
+  s.name = "playerconnect-wsdsl"
+  s.version = "0.3.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Team SDOD}]
-  s.date = %q{2011-11-02}
-  s.description = %q{A Ruby DSL describing Web Services without implementation details.}
-  s.email = %q{sdod}
+  s.authors = ["Team SDOD"]
+  s.date = "2011-11-03"
+  s.description = "A Ruby DSL describing Web Services without implementation details."
+  s.email = "sdod"
   s.extra_rdoc_files = [
     "LICENSE",
     "README.md"
   ]
   s.files = [
     ".rvmrc_example",
+    "Gemfile",
+    "Gemfile.lock",
     "LICENSE",
     "README.md",
     "Rakefile",
@@ -42,19 +44,34 @@ Gem::Specification.new do |s|
     "spec/wsdsl_spec.rb",
     "wsdsl.gemspec"
   ]
-  s.homepage = %q{http://github.com/playerconnect/wsdsl}
-  s.licenses = [%q{MIT}]
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.5}
-  s.summary = %q{Web Service DSL}
+  s.homepage = "http://github.com/playerconnect/wsdsl"
+  s.licenses = ["MIT"]
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.10"
+  s.summary = "Web Service DSL"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<jeweler>, ["= 1.6.4"])
+      s.add_runtime_dependency(%q<rspec>, ["= 2.7.0"])
+      s.add_runtime_dependency(%q<yard>, ["= 0.7.2"])
+      s.add_runtime_dependency(%q<rack-test>, ["= 0.5.7"])
+      s.add_runtime_dependency(%q<sinatra>, ["= 1.2.0"])
     else
+      s.add_dependency(%q<jeweler>, ["= 1.6.4"])
+      s.add_dependency(%q<rspec>, ["= 2.7.0"])
+      s.add_dependency(%q<yard>, ["= 0.7.2"])
+      s.add_dependency(%q<rack-test>, ["= 0.5.7"])
+      s.add_dependency(%q<sinatra>, ["= 1.2.0"])
     end
   else
+    s.add_dependency(%q<jeweler>, ["= 1.6.4"])
+    s.add_dependency(%q<rspec>, ["= 2.7.0"])
+    s.add_dependency(%q<yard>, ["= 0.7.2"])
+    s.add_dependency(%q<rack-test>, ["= 0.5.7"])
+    s.add_dependency(%q<sinatra>, ["= 1.2.0"])
   end
 end
 
