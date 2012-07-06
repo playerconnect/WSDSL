@@ -135,10 +135,8 @@ module ParamsVerification
       raise MissingParam, "'#{rule.name}' is missing - passed params: #{params.inspect}."
     end
 
-    # checks null
-    if param_value.nil? && !rule.options[:null]
-      raise  InvalidParamValue, "Value for parameter '#{param_name}' is missing - passed params: #{params.inspect}."
-    end
+    # check for nulls in params that don't allow them
+    check_for_null(param_name, param_value, rule, params, namespace)
 
     # run the common set of rules used for any non nil value
     params = self.run_when_not_nil(rule, params, namespace)
@@ -260,6 +258,10 @@ module ParamsVerification
       end
     end
 
+    # If the value is still null after possibly being given a default,
+    # reject it if "null" is explicitly set to false.
+    check_for_null(param_name, param_value, rule, params, namespace)
+
     # run the common set of rules used for any non nil value
     params = self.run_when_not_nil(rule, params, namespace) if param_value
 
@@ -344,4 +346,22 @@ module ParamsVerification
     end
   end
 
+  # if ":null => false" is explicitly set, null values will be rejected (even
+  # for optional params)
+  def self.check_for_null(param_name, param_value, rule, params, namespace)
+    # don't check for null against params that weren't even submitted
+    # return unless params && params.size > 0
+    if namespace
+      return unless params.has_key?(namespace)
+      params = params[namespace]
+    end
+    return unless params && params.has_key?(param_name)
+
+    # if 'null' is found in the ruleset and set to 'false' (default is 'true' to allow null),
+    # then confirm that the submitted value isn't nil or empty
+    if rule.options.has_key?(:null) && rule.options[:null] == false &&
+       (param_value.nil? || param_value == '' || (param_value.respond_to?(:size) && param_value.size == 0))
+      raise InvalidParamValue, "Value for parameter '#{param_name}' cannot be null - passed params: #{params.inspect}."
+    end
+  end
 end
