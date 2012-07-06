@@ -1,9 +1,4 @@
 gemset_name=wsdsl
 ruby_version=1.9.2-p290
-rubygems_version=1.8.10
-bundler_version=1.0.21
 
 rvm use $ruby_version@$gemset_name --create --install
-[ $(gem -v) = $rubygems_version ] || rvm rubygems $rubygems_version
-gem list bundler -v${bundler_version} -i >/dev/null
-[ $? -eq 0 ] || gem install bundler -v${bundler_version} --no-ri --no-rdoc
