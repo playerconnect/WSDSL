@@ -1,4 +1,4 @@
-describe_service "hello_world.xml" do |service|
+describe_service "hello_world" do |service|
   service.formats    :xml
   service.http_verb :get
   service.disable_auth # on by default

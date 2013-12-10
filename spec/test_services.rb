@@ -1,6 +1,6 @@
 WSDSLSpecOptions = ['RSpec', 'Bacon'] # usually pulled from a model
 
-describe_service "services/test.xml" do |service|
+describe_service "services/test" do |service|
   service.formats  :xml, :json
   service.http_verb :get
 
@@ -63,19 +63,19 @@ The most common way to use this service looks like that:
 end
 
 
-describe_service "services/test_no_params.xml" do |service|
+describe_service "services/test_no_params" do |service|
   service.formats  :xml
   service.http_verb :get
   service.accept_no_params!
 end
 
-describe_service "services.xml" do |service|
+describe_service "services" do |service|
   service.formats  :xml
   service.http_verb :put
 
 end
 
-describe_service "services/array_param.xml" do |s|
+describe_service "services/array_param" do |s|
   s.formats :xml
   s.http_verb :post
 

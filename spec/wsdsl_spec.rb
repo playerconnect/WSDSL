@@ -3,13 +3,13 @@ require File.expand_path("spec_helper", File.dirname(__FILE__))
 describe WSDSL do
   
   before :all do
-    @service = WSList.all.find{|s| s.url == 'services/test.xml'}
+    @service = WSList.all.find{|s| s.url == 'services/test'}
     @service.should_not be_nil
   end
   
   it "should have an url" do
     # dummy test since that's how we found the service, but oh well
-    @service.url.should be == 'services/test.xml'
+    @service.url.should be == 'services/test'
   end
   
   it "should have some http verbs defined" do
@@ -39,7 +39,7 @@ describe WSDSL do
   it "should set the controller accordingly" do
     @service.controller_name.should_not be_nil
     @service.controller_name.should be == 'ServicesController'
-    service = WSDSL.new("preferences.xml")
+    service = WSDSL.new("preferences")
     service.name.should be == 'preferences'
     ExtlibCopy.classify('preferences').should be == 'Preferences'
     service.controller_name.should be == 'PreferencesController'
@@ -51,7 +51,7 @@ describe WSDSL do
   end
   
   it "should support restful routes based on the HTTP verb" do
-    service = WSList.all.find{|s| s.url == "services.xml"}
+    service = WSList.all.find{|s| s.url == "services"}
     service.should_not be_nil
     service.http_verb.should be == :put
     service.action.should_not be_nil
@@ -60,39 +60,39 @@ describe WSDSL do
   end
 
   it "should have a default action" do
-   service = WSDSL.new('spec_test.xml')
+   service = WSDSL.new('spec_test')
    service.action.should be == 'list'
   end
 
   it "should route to show when an id is the last passed param" do
-    service = WSDSL.new("players/:id.xml")
+    service = WSDSL.new("players/:id")
     service.action.should be == 'show'
   end
 
   it "should support some extra attributes" do
-    service = WSDSL.new("players/:id.xml")
+    service = WSDSL.new("players/:id")
     service.extra[:custom_name] = 'fooBar'
     service.extra[:custom_name].should be == 'fooBar'
   end
 
   it "should respect the global controller pluralization flag" do
     WSDSL.use_pluralized_controllers = true
-    service = WSDSL.new("player/:id.xml")
+    service = WSDSL.new("player/:id")
     service.controller_name.should be == "PlayersController"
-    service = WSDSL.new("players/:id.xml")
+    service = WSDSL.new("players/:id")
     service.controller_name.should be == "PlayersController"
     WSDSL.use_pluralized_controllers = false
-    service = WSDSL.new("player/:id.xml")
+    service = WSDSL.new("player/:id")
     service.controller_name.should be == "PlayerController"
   end
 
 
   it "should let overwrite the controller name and action after initialization" do
-    describe_service "players/:id.xml" do |service|
+    describe_service "players/:id" do |service|
       service.controller_name "CustomController"
       service.action :foo
     end
-    service = WSList.all.find{|s| s.url == "players/:id.xml"}
+    service = WSList.all.find{|s| s.url == "players/:id"}
     service.controller_name.should be == "CustomController"
     service.action.should be == :foo
   end
@@ -132,36 +132,36 @@ describe WSDSL do
     end
 
     it "should be able to dispatch controller" do
-      describe_service("projects.xml") { |s| }
-      service = WSList.all.find{|s| s.url == "projects.xml"}
+      describe_service("projects") { |s| }
+      service = WSList.all.find{|s| s.url == "projects"}
       service.controller_dispatch("application").
         should be == ["application", "projects"]
     end
 
     it "should be able to dispatch namespaced controller" do
-      describe_service("project/:project_id/tasks.xml") do |service|
+      describe_service("project/:project_id/tasks") do |service|
         service.controller_name = "Projects::TasksController"
         service.action = "list"
       end
 
-      describe_service("project/:project_id/task/:task_id/items.xml") do |service|
+      describe_service("project/:project_id/task/:task_id/items") do |service|
         service.controller_name = "Projects::Tasks::ItemsController"
         service.action = "list"
       end
 
-      service = WSList.all.find{|s| s.url == "project/:project_id/tasks.xml"}
+      service = WSList.all.find{|s| s.url == "project/:project_id/tasks"}
       service.controller_dispatch("application").should be == ["application", "project"]
 
-      service = WSList.all.find{|s| s.url == "project/:project_id/task/:task_id/items.xml"}
+      service = WSList.all.find{|s| s.url == "project/:project_id/task/:task_id/items"}
       service.controller_dispatch("application").should be == ["application", "project"]
     end
 
     it "should raise exception when controller class is not found" do
-      describe_service("unknown.xml") do |service|
+      describe_service("unknown") do |service|
         service.controller_name = "UnknownController"
         service.action = "list"
       end
-      service = WSList.all.find{|s| s.url == "unknown.xml"}
+      service = WSList.all.find{|s| s.url == "unknown"}
       lambda { service.controller_dispatch("application") }.
         should raise_error("The UnknownController class was not found")
       lambda { service.controller_dispatch("application") }.
@@ -237,7 +237,7 @@ describe WSDSL do
     end
     
     it "should allow to define namespaced params doc" do
-      service = WSList.all.find{|s| s.url == "services.xml"}
+      service = WSList.all.find{|s| s.url == "services"}
       service.documentation do |doc|
         doc.namespace :preference do |ns|
           ns.param :id, "Ze id."

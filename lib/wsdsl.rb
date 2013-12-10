@@ -331,8 +331,8 @@ class WSDSL
   end
 
   SERVICE_ROOT_REGEXP = /(.*?)[\/\(\.]/  
-  SERVICE_ACTION_REGEXP = /[\/\(\.]([a-z0-9_]+)[\/\(\.\?]/i
-  SERVICE_RESTFUL_SHOW_REGEXP = /\/:[a-z0-9_]+\.\w{3}$/
+  SERVICE_ACTION_REGEXP = /[\/\(\.]([a-z0-9_]+)[\/\.\(\?]?/i # /[\/\(\.]([a-z0-9_]+)[\/\(\.\?]/i
+  SERVICE_RESTFUL_SHOW_REGEXP = /\/:[a-z0-9_]+$/ # /\/:[a-z0-9_]+\.\w{3}$/
   
   private
   

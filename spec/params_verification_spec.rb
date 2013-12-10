@@ -3,7 +3,7 @@ require_relative "spec_helper"
 describe ParamsVerification do
 
   before :all do
-    @service = WSList.all.find{|s| s.url == 'services/test.xml'}
+    @service = WSList.all.find{|s| s.url == 'services/test'}
     @service.should_not be_nil
   end
 
@@ -72,7 +72,7 @@ describe ParamsVerification do
   end
 
   it "should cast a comma delimited string into an array when param marked as an array" do
-    service = WSList.all.find{|s| s.url == "services/array_param.xml"}
+    service = WSList.all.find{|s| s.url == "services/array_param"}
     service.should_not be_nil
     params = {'seq' => "a,b,c,d,e,g"}
     validated = ParamsVerification.validate!(params, service.defined_params)
@@ -80,7 +80,7 @@ describe ParamsVerification do
   end
 
   it "should not raise an exception if a req array param doesn't contain a comma" do
-    service = WSList.all.find{|s| s.url == "services/array_param.xml"}
+    service = WSList.all.find{|s| s.url == "services/array_param"}
     params = {'seq' => "a b c d e g"}
     lambda{ ParamsVerification.validate!(params, service.defined_params) }.should_not raise_exception(ParamsVerification::InvalidParamType)
   end
@@ -127,13 +127,13 @@ describe ParamsVerification do
     lambda{ ParamsVerification.validate!(params, @service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
     # other service
     params = {'preference' => {'region_code' => 'us', 'language_code' => 'de'}}
-    service = WSList.all.find{|s| s.url == 'preferences.xml'}
+    service = WSList.all.find{|s| s.url == 'preferences'}
     service.should_not be_nil
     lambda{ ParamsVerification.validate!(params, service.defined_params) }.should raise_exception(ParamsVerification::InvalidParamValue)
   end
 
   it "should validate that no params are passed when accept_no_params! is set on a service" do
-    service = WSList.all.find{|s| s.url == "services/test_no_params.xml"}
+    service = WSList.all.find{|s| s.url == "services/test_no_params"}
     service.should_not be_nil
     params = @valid_params.dup
     lambda{ ParamsVerification.validate!(params, service.defined_params) }.should raise_exception

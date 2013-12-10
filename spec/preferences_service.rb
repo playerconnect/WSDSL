@@ -1,4 +1,4 @@
-describe_service "preferences.xml" do |service|
+describe_service "preferences" do |service|
   
   service.params do |p|
     p.namespace :preference do |pr|
