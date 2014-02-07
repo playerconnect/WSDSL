@@ -29,7 +29,7 @@ class WSDSL
     # @return [Array<WSDSL::Response::Element>]
     # @api public
     def element(opts={})
-      el = Element.new(opts[:name], opts[:type])
+      el = Element.new(opts[:name], opts[:type], opts[:required])
       yield(el) if block_given?
       @elements << el
     end
@@ -55,6 +55,9 @@ class WSDSL
       attr_reader :name
 
       # @api public
+      attr_reader :required
+
+      # @api public
       attr_reader :type
 
       # @return [Array<WSDSL::Response::Element::Attribute>] An array of attributes
@@ -75,12 +78,13 @@ class WSDSL
       # param [String, Symbol] name The name of the element
       # param [String, Symbol] type The optional type of the element
       # @api public
-      def initialize(name, type=nil)
+      def initialize(name, type=nil, required=nil)
         # sets a documentation placeholder since the response doc is defined at the same time
         # the response is defined.
         @doc        = Documentation::ElementDoc.new(name)
         @name       = name
         @type       = type
+        @required   = !(required==false)
         @attributes = []
         @vectors    = []
         # we don't need to initialize the nested elements, by default they should be nil
@@ -168,7 +172,7 @@ class WSDSL
       # @return [Array<WSDSL::Response::Element>]
       # @api public
       def element(opts={})
-        el = Element.new(opts[:name], opts[:type])
+        el = Element.new(opts[:name], opts[:type], opts[:required])
         yield(el) if block_given?
         @elements ||= []
         @elements << el
@@ -234,6 +238,9 @@ class WSDSL
         attr_reader :obj_type
 
         # @api public
+        attr_accessor :required
+
+        # @api public
         attr_accessor :attributes
 
         # A vector can have nested elements.
@@ -260,6 +267,7 @@ class WSDSL
         def initialize(opts)
           @name       = opts[:name]
           @obj_type   = opts[:type]
+          @required   = !(opts[:required] == false)
           @attributes = []
         end
 
@@ -288,7 +296,7 @@ class WSDSL
         # @return [Array<WSDSL::Response::Element>]
         # @api public
         def element(opts={})
-          el = Element.new(opts[:name], opts[:type])
+          el = Element.new(opts[:name], opts[:type], opts[:required])
           yield(el) if block_given?
           @elements ||= []
           @elements << el
