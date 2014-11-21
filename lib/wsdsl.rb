@@ -1,6 +1,7 @@
 require File.expand_path('inflection', File.dirname(__FILE__))
 require File.expand_path('params', File.dirname(__FILE__))
 require File.expand_path('response', File.dirname(__FILE__))
+require File.expand_path('response_exceptions', File.dirname(__FILE__))
 require File.expand_path('documentation', File.dirname(__FILE__))
 require File.expand_path('ws_list', File.dirname(__FILE__))
 
@@ -111,6 +112,12 @@ class WSDSL
   # @api public
   # @since 0.1
   attr_reader :extra
+
+  # Array of exception classes
+  #
+  # @return [Class]
+  # @api public
+  attr_reader :exceptions
   
   # Service constructor which is usually used via {Kernel#describe_service}
   #
@@ -122,6 +129,7 @@ class WSDSL
     @defined_params      = WSDSL::Params.new
     @doc                 = WSDSL::Documentation.new
     @response            = WSDSL::Response.new
+    @exceptions          = WSDSL::ResponseExceptions.new
     @name                = extract_service_root_name(url)
     if WSDSL.use_pluralized_controllers
       base_name = ExtlibCopy::Inflection.pluralize(ExtlibCopy::Inflection.singular(name))
@@ -288,7 +296,20 @@ class WSDSL
     @formats
   end
 
-  # Sets and/or returns the service action
+  # Sets or returns the known exceptions
+  # @param [Class] exception_classes Known response exceptions
+  #
+  # @return [Array<Class>]   List of known exception classes
+  # @api public
+  def exceptions
+    if block_given?
+      yield(@exceptions)
+    else
+      @exceptions
+    end
+  end
+
+  # Sets and/or returns the service known exceptions
   # @param [String, Symbol] a Action to use for the service, such as :show
   #
   # @return [Symbol]  The service action
