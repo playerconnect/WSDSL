@@ -146,6 +146,18 @@ class WSDSL
     @extra               = {}
     @content_type        = nil
   end
+
+  def self.partials
+    @partials     ||= {}
+  end
+
+  def self.define_partial(name, &block)
+    partials[name] = block
+  end
+
+  def self.partial(name, args)
+    partials[name].call(args) if(partials.has_key?(name))
+  end
   
   # Checks the WSDSL flag to see if the controller names are pluralized.
   #
