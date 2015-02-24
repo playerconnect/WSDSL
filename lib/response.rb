@@ -90,7 +90,7 @@ class WSDSL
         @name       = opts.delete(:name) if(opts.has_key?(:name))
         @doc        = Documentation::ElementDoc.new(@name)
         @type       = opts.delete(:type) if(opts.has_key?(:type))
-        @required   = !(opts.delete(:required)==false)
+        @required   = opts.has_key?(:required) ? opts[:required] : true
         @attributes = []
         @vectors    = []
         @opts       = opts
@@ -278,7 +278,7 @@ class WSDSL
           opts[:required] ||= false
           @name       = opts.delete(:name) if opts.has_key?(:name)
           @obj_type   = opts.delete(:type) if opts.has_key?(:type)
-          @required   = !(opts.delete(:required) == false)
+          @required   = opts.has_key?(:required) ? opts[:required] : true
           @opts       = opts
           @attributes = []
         end
