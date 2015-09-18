@@ -83,7 +83,7 @@ class WSDSL
       # @api public
       def initialize(opts={})
         opts[:type] ||= nil
-        opts[:required] ||= nil
+        opts[:required] = nil if !opts.has_key?(:required)
 
         # sets a documentation placeholder since the response doc is defined at the same time
         # the response is defined.
